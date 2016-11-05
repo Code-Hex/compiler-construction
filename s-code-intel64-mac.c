@@ -136,24 +136,19 @@ emit_push()
 void
 emit_compare()
 {
-    printf("\tcmpq %%rax,(%%rsp)\n");
-    printf("\t%s %%al\n","setg");
-    printf("\tmovzbq %%al,%%rax\n");
-    printf("\taddq $8,%%rsp\n");
+    printf("\tcmpq %%rax, (%%rsp)\n");
 }
 
 void
 emit_store( int d )
 {
-    printf("\tmovq _v@GOTPCREL(%%rip), %%rcx\n");
-    printf("\tmovq %%rax, %d(%%rcx)\n" ,d*8);
+    printf("\tmovl %%eax, %d(%%rbp)\n", -4 * d);
 }
 
 void
 emit_load(int d)
 {
-    printf("\tmovq _v@GOTPCREL(%%rip), %%rcx\n");
-    printf("\tmovq %d(%%rcx),%%rax\n" ,d*8);
+    printf("\tmovl %d(%%rbp), %%eax\n", -4 * d);
 }
 
 
@@ -175,16 +170,16 @@ char *opcode[] = {
 void
 emit_calc(enum opcode op)
 {
-    if (op==O_DIV ) {
+    if (op == O_DIV) {
         printf("\tmovq %%rax,%%rbx\n");
         printf("\tpopq %%rax\n");
         printf("\tcltd\n");
         printf("\tidivq %%rbx\n");
-    } else if( op==O_DIV_R ) {
+    } else if (op == O_DIV_R) {
         printf("\tpopq %%rbx\n");
         printf("\tcltd\n");
         printf("\tidivq %%rbx\n");
-    } else if(op==O_SUB) {
+    } else if (op == O_SUB) {
         printf("\tpopq %%rbx\n");
         printf("\t%s %%rbx,%%rax\n",opcode[op]);
         printf("\tnegq %%rax\n");
@@ -205,14 +200,14 @@ void
 emit_comment()
 {
     if (before < ptr) {
-    putchar('#'); putchar('#'); putchar(' ');
-    while (before < ptr) {
-        if(*before && *before!='\n') {
-        putchar(*before);
+        putchar('#'); putchar('#'); putchar(' ');
+        while (before < ptr) {
+            if (*before && *before != '\n') {
+                putchar(*before);
+            }
+            before++;
         }
-        before++;
-    }
-    putchar('\n');
+        putchar('\n');
     }
 }
 
@@ -228,8 +223,8 @@ void
 emit_intro()
 {
     char **iptr;
-    for(iptr=intro;*iptr;iptr++) {
-        printf("%s",*iptr);
+    for(iptr=intro; *iptr; iptr++) {
+        printf("%s", *iptr);
     }
 }
 
@@ -237,8 +232,8 @@ void
 emit_ending()
 {
     char **iptr;
-    for(iptr=ending;*iptr;iptr++) {
-        printf("%s",*iptr);
+    for (iptr=ending; *iptr; iptr++) {
+        printf("%s", *iptr);
     }
 }
 

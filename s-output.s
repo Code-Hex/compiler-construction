@@ -251,8 +251,7 @@ LCFI5:
 	movq $1,%rax
 	popq %rbx
 	imulq %rbx,%rax
-	movq _v@GOTPCREL(%rip), %rcx
-	movq %rax, 0(%rcx)
+	movl %eax, 0(%rbp)
 	movq %rax, %rdi
 	call _print
 ## a=1*3
@@ -262,17 +261,14 @@ LCFI5:
 	movq $2,%rax
 	popq %rbx
 	imulq %rbx,%rax
-	movq _v@GOTPCREL(%rip), %rcx
-	movq %rax, 8(%rcx)
+	movl %eax, -4(%rbp)
 	movq %rax, %rdi
 	call _print
 ## b=2*3
 ##### a+b
-	movq _v@GOTPCREL(%rip), %rcx
-	movq 8(%rcx),%rax
+	movl -4(%rbp), %eax
 	pushq %rax
-	movq _v@GOTPCREL(%rip), %rcx
-	movq 0(%rcx),%rax
+	movl 0(%rbp), %eax
 	popq %rbx
 	addq %rbx,%rax
 	movq %rax, %rdi
@@ -284,41 +280,29 @@ LCFI5:
 	movq $3,%rax
 	popq %rbx
 	imulq %rbx,%rax
-	movq _v@GOTPCREL(%rip), %rcx
-	movq %rax, 8(%rcx)
-	movq _v@GOTPCREL(%rip), %rcx
-	movq %rax, 0(%rcx)
+	movl %eax, -4(%rbp)
+	movl %eax, 0(%rbp)
 	movq %rax, %rdi
 	call _print
 ## a=(b=3*2)
 ##### a>1
-	movq _v@GOTPCREL(%rip), %rcx
-	movq 0(%rcx),%rax
+	movl 0(%rbp), %eax
 	pushq %rax
 	movq $1,%rax
-	cmpq %rax,(%rsp)
-	setg %al
-	movzbq %al,%rax
-	addq $8,%rsp
+	cmpq %rax, (%rsp)
 	movq %rax, %rdi
 	call _print
 ## a>1
 ##### b
-	movq _v@GOTPCREL(%rip), %rcx
-	movq 8(%rcx),%rax
+	movl -4(%rbp), %eax
 	movq %rax, %rdi
 	call _print
 ## b
 ##### b>a
-	movq _v@GOTPCREL(%rip), %rcx
-	movq 8(%rcx),%rax
+	movl -4(%rbp), %eax
 	pushq %rax
-	movq _v@GOTPCREL(%rip), %rcx
-	movq 0(%rcx),%rax
-	cmpq %rax,(%rsp)
-	setg %al
-	movzbq %al,%rax
-	addq $8,%rsp
+	movl 0(%rbp), %eax
+	cmpq %rax, (%rsp)
 	movq %rax, %rdi
 	call _print
 ## b>a
