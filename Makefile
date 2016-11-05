@@ -1,12 +1,12 @@
 TEST = s-imac64
 
 CC = clang
-CFLAGS = -g -O0  -Wall
+CFLAGS = -g -O0 -Wall
 
-TARGET =  s-imac64
+TARGET = s-imac64
 
 s-imac64: s-token.o s-tree-compile.o s-code-intel64-mac.o  
-	$(CC) $(CFLAGS)  -o $@ $^
+	$(CC) $(CFLAGS) -g -o $@ $^
 
 clean:
 	rm -rf *.o  $(TARGET) a.out *.dSYM *.s

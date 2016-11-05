@@ -5,11 +5,14 @@
 
 #include "s-compile.h"
 
+#include <string.h>
 #include <stdlib.h>    // for malloc
 
 static int optimize = 0;
 
-#define NEW(type) ((type *)malloc(sizeof(type)))
+#define ADD(type) ((type *)calloc(1, sizeof(type)))
+#define NEW(type, size) ((type **)calloc(size, sizeof(type)))
+#define RENEW(type, ptr, size) ((type **)realloc(ptr, size * sizeof(type)))
 
 typedef struct node {
     struct node *left;
@@ -18,14 +21,68 @@ typedef struct node {
     int value;
 } node, *node_ptr;
 
-static node *expr();
-static node *aexpr();
-static node *mexpr();
-static node *term();
-static node *new_node();
+typedef struct nodes {
+    node **ptrs;
+    int ptr;
+    int size;
+} nodes;
+
+static node *expr(nodes *);
+static node *aexpr(nodes *);
+static node *mexpr(nodes *);
+static node *term(nodes *);
+static node *set_node(nodes *, int, int, node_ptr, node_ptr);
+static void free_nodes(nodes *);
+static void alloc_nodes(nodes *, int);
+static int get_ptr(nodes *);
+
+static int
+get_ptr(nodes *ary)
+{
+	int p = ary->ptr;
+	ary->ptr++;
+	return p;
+}
+
+static void
+alloc_nodes(nodes *ary, int size)
+{
+	if (ary->ptrs == NULL) {
+		ary->ptrs = NEW(node, size);
+		for (int i = 0; i < size; i++)
+			ary->ptrs[i] = ADD(node);
+		ary->ptr = 0;
+		ary->size = size;
+		return;
+	}
+
+	if (ary->size < size) {
+		ary->ptrs = RENEW(node, ary->ptrs, size);
+		for (int i = ary->size; i < size; i++)
+			ary->ptrs[i] = ADD(node);
+		ary->ptr = 0;
+		ary->size = size;
+		return;
+	}
+
+	ary->ptr = 0;
+}
+
+static void
+free_nodes(nodes *ary)
+{
+	if (ary) {
+		for (int i = 1; i < ary->size; i++) {
+			if (ary->ptrs[i])
+				free(ary->ptrs[i]);
+		}
+
+		free(ary->ptrs);
+	}
+}
 
 static node_ptr
-new_node(int type,int value,node_ptr left,node_ptr right) 
+set_node(nodes *ary, int type, int value, node_ptr left, node_ptr right) 
 {
     node *d;
     if (optimize && (left  &&  left->type =='0') &&
@@ -34,30 +91,27 @@ new_node(int type,int value,node_ptr left,node_ptr right)
 		case '>':
 		    right->value = (left->value > right->value); 
 		    free(left); return right;
-		    break;
 		case '+':
 		    right->value = left->value + right->value; 
 		    free(left); return right;
-		    break;
 		case '-':
 		    right->value = left->value - right->value; 
 		    free(left); return right;
-		    break;
 		case '*':
 		    right->value = right->value * left->value;
 		    free(left); return right;
-		    break;
 		case '/':
-		    if(right->value==0) {
-			error("zero divide in compile time");
+		    if (right->value==0) {
+				error("zero divide in compile time");
 		    } else {
-			right->value = left->value / right->value;
+				right->value = left->value / right->value;
 		    }
 		    free(left); return right;
 		}
     }
-    // d =  (node *)malloc(sizeof(node));
-    d =  NEW(node);
+
+    int p = get_ptr(ary);
+    d = ary->ptrs[p];
     d->type = type;
     d->value = value;
     d->left = left;
@@ -66,21 +120,7 @@ new_node(int type,int value,node_ptr left,node_ptr right)
 }
 
 static void
-free_node(d)
-node_ptr d;
-{
-    if(d->left) {
-	free_node(d->left);
-    } 
-    if(d->right) {
-	free_node(d->right);
-    } 
-    free(d);
-}
-
-static void
-code_generate(d)
-node_ptr d;
+code_generate(node_ptr d)
 {
     int assign;
     switch(d->type) {
@@ -91,7 +131,7 @@ node_ptr d;
 		emit_load(d->value);
 		return;
     case '=':
-		if(!d->left || d->left->type != 'v') {
+		if (!d->left || d->left->type != 'v') {
 		    error("Bad assignment");
 		    code_generate(d->right);
 		    return;
@@ -123,18 +163,18 @@ node_ptr d;
 }
 
 static node_ptr 
-expr()
+expr(nodes *ary)
 {
     node *d;
 
-    d = aexpr();
+    d = aexpr(ary);
     while(last_token!=EOF) {
 		switch(last_token) {
 		case '>': 
-		    d = new_node('>',0,d,aexpr()); 
+		    d = set_node(ary, '>', 0, d, aexpr(ary)); 
 		    break;
 		case '=': 
-		    d = new_node('=',0,d,aexpr()); 
+		    d = set_node(ary, '=', 0, d, aexpr(ary)); 
 		    break;
 		case ')': 
 		    return d;
@@ -147,18 +187,18 @@ expr()
 }
 
 static node_ptr 
-aexpr()
+aexpr(nodes *ary)
 {
     node *d;
 
-    d = mexpr();
+    d = mexpr(ary);
     while(last_token!=EOF) {
 		switch(last_token) {
 		case '-': 
-		    d = new_node('-',0,d,mexpr());
+		    d = set_node(ary, '-', 0, d, mexpr(ary));
 		    break;
 		case '+': 
-		    d = new_node('+',0,d,mexpr());
+		    d = set_node(ary, '+', 0, d, mexpr(ary));
 		    break;
 		default:
 		    return d;
@@ -168,18 +208,18 @@ aexpr()
 }
 
 static node_ptr
-mexpr()
+mexpr(nodes *ary)
 {
     node *d;
 
-    d = term();
+    d = term(ary);
     while(last_token!=EOF) {
 		switch(last_token) {
 		case '*': 
-		    d = new_node('*',0,d,term());
+		    d = set_node(ary, '*', 0, d, term(ary));
 		    break;
 		case '/': 
-		    d = new_node('/',0,d,term());
+		    d = set_node(ary, '/', 0, d, term(ary));
 		    break;
 		default:
 		    return d;
@@ -189,26 +229,26 @@ mexpr()
 }
 
 static node_ptr
-term()
+term(nodes *ary)
 {
     node *d;
 
-    lvalue= -1;
+    lvalue = -1;
     token();
     if (last_token==EOF) {
 		error("Term expected");
     }
     switch(last_token) {
     case '0':
-		d = new_node('0',value,NULL,NULL);
+		d = set_node(ary, '0', value, NULL, NULL);
 		token();
 		return d;
     case 'v':
-		d = new_node('v',value,NULL,NULL);
+		d = set_node(ary, 'v', value, NULL, NULL);
 		token();
 		return d;
     case '(':
-		d = expr();
+		d = expr(ary);
 		if (last_token != ')') {
 		    error("Unbalanced parenthsis");
 		} 
@@ -221,24 +261,27 @@ term()
     }
 }
 
-
 int
 main() 
 {
-    node *d;
+	node *d;
+    nodes ary;
     char buf[BUFSIZ];
 
     emit_intro();
     while (fgets(buf,BUFSIZ,stdin)) {
 		ptr = buf;
 		before = buf;
-		printf("%s %s",comments,buf);
-		d = expr();
+
+		alloc_nodes(&ary, strlen(buf) - 1);
+		printf("%s %s", comments, buf);
+		d = expr(&ary);
 		code_generate(d);
-		free_node(d);
 		emit_print();
 		emit_comment();
     }
+
+    free_nodes(&ary);
     emit_ending();
     return 0;
 }
