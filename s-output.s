@@ -298,16 +298,13 @@ LCFI5:
 	movq %rax, %rdi
 	call _print
 ## b
-##### b>a
-	movl -4(%rbp), %eax
+##### b>a	movl -4(%rbp), %eax
 	pushq %rax
 	movl 0(%rbp), %eax
 	cmpq %rax, (%rsp)
 	movq %rax, %rdi
 	call _print
 ## b>a
-    movq    %rax, %rdi
-    call    _print
     movq    $0,%rax
     leave
     ret

@@ -46,8 +46,6 @@ char *intro[] = {
 
 static
 char *ending[] = {
-  "    movq    %rax, %rdi\n",
-  "    call    _print\n",
   "    movq    $0,%rax\n",
   "    leave\n",
   "    ret\n",

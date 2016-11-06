@@ -126,25 +126,25 @@ code_generate(node_ptr d)
     switch(d->type) {
     case '0':
 		emit_value(d->value);
-		return;
+		break;
     case 'v':
 		emit_load(d->value);
-		return;
+		break;
     case '=':
 		if (!d->left || d->left->type != 'v') {
 		    error("Bad assignment");
 		    code_generate(d->right);
-		    return;
+		    break;
 		}
 		assign = d->left->value;
 		code_generate(d->right);
 		emit_store(assign);
-		return;
+		break;
     case '>': 
 		code_generate(d->left);
 		emit_push();
 		code_generate(d->right);
-		emit_compare(); 
+		emit_compare();
 		break;
     default:   /* calculation */
 		code_generate(d->right);
@@ -157,8 +157,9 @@ code_generate(node_ptr d)
 		case '*': emit_calc(O_MUL); break;
 		default:
 		    error("Internal Error, unknown opecode");
+		    break;
 		}
-	return;
+		break;
     }
 }
 
