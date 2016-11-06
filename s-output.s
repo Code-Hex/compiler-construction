@@ -31,60 +31,60 @@ LCFI5:
 
 
 ##### 1
-	movq $1,%rax
+	movq $1, %rax
 	movq %rax, %rdi
 	call _print
 ## 1
 ##### 1+2			//  expr
-	movq $2,%rax
+	movq $2, %rax
 	pushq %rax
-	movq $1,%rax
+	movq $1, %rax
 	popq %rbx
 	addq %rbx,%rax
 	movq %rax, %rdi
 	call _print
 ## 1+2			//  expr
 ##### 2*3			//  mexpr
-	movq $3,%rax
+	movq $3, %rax
 	pushq %rax
-	movq $2,%rax
+	movq $2, %rax
 	popq %rbx
 	imulq %rbx,%rax
 	movq %rax, %rdi
 	call _print
 ## 2*3			//  mexpr
 ##### 1+(2*3)			// term
-	movq $3,%rax
+	movq $3, %rax
 	pushq %rax
-	movq $2,%rax
+	movq $2, %rax
 	popq %rbx
 	imulq %rbx,%rax
 	pushq %rax
-	movq $1,%rax
+	movq $1, %rax
 	popq %rbx
 	addq %rbx,%rax
 	movq %rax, %rdi
 	call _print
 ## 1+(2*3)			// term
 ##### 1-(2-3)			// association
-	movq $3,%rax
+	movq $3, %rax
 	pushq %rax
-	movq $2,%rax
+	movq $2, %rax
 	popq %rbx
 	subq %rbx,%rax
 	pushq %rax
-	movq $1,%rax
+	movq $1, %rax
 	popq %rbx
 	subq %rbx,%rax
 	movq %rax, %rdi
 	call _print
 ## 1-(2-3)			// association
 ##### 1-2-3			// association
-	movq $3,%rax
+	movq $3, %rax
 	pushq %rax
-	movq $2,%rax
+	movq $2, %rax
 	pushq %rax
-	movq $1,%rax
+	movq $1, %rax
 	popq %rbx
 	subq %rbx,%rax
 	popq %rbx
@@ -93,24 +93,24 @@ LCFI5:
 	call _print
 ## 1-2-3			// association
 ##### 1+2*3			// expr order
-	movq $3,%rax
+	movq $3, %rax
 	pushq %rax
-	movq $2,%rax
+	movq $2, %rax
 	popq %rbx
 	imulq %rbx,%rax
 	pushq %rax
-	movq $1,%rax
+	movq $1, %rax
 	popq %rbx
 	addq %rbx,%rax
 	movq %rax, %rdi
 	call _print
 ## 1+2*3			// expr order
 ##### 3*2-3			// expr order
-	movq $3,%rax
+	movq $3, %rax
 	pushq %rax
-	movq $2,%rax
+	movq $2, %rax
 	pushq %rax
-	movq $3,%rax
+	movq $3, %rax
 	popq %rbx
 	imulq %rbx,%rax
 	popq %rbx
@@ -119,29 +119,29 @@ LCFI5:
 	call _print
 ## 3*2-3			// expr order
 ##### 1+10*10			// token
-	movq $10,%rax
+	movq $10, %rax
 	pushq %rax
-	movq $10,%rax
+	movq $10, %rax
 	popq %rbx
 	imulq %rbx,%rax
 	pushq %rax
-	movq $1,%rax
+	movq $1, %rax
 	popq %rbx
 	addq %rbx,%rax
 	movq %rax, %rdi
 	call _print
 ## 1+10*10			// token
 ##### (2+1030/2)-2
-	movq $2,%rax
+	movq $2, %rax
 	pushq %rax
-	movq $2,%rax
+	movq $2, %rax
 	pushq %rax
-	movq $1030,%rax
+	movq $1030, %rax
 	popq %rbx
 	cltd
 	idivq %rbx
 	pushq %rax
-	movq $2,%rax
+	movq $2, %rax
 	popq %rbx
 	addq %rbx,%rax
 	popq %rbx
@@ -150,11 +150,11 @@ LCFI5:
 	call _print
 ## (2+1030/2)-2
 ##### (255*07)+256		// logical expression
-	movq $256,%rax
+	movq $256, %rax
 	pushq %rax
-	movq $7,%rax
+	movq $7, %rax
 	pushq %rax
-	movq $255,%rax
+	movq $255, %rax
 	popq %rbx
 	imulq %rbx,%rax
 	popq %rbx
@@ -163,71 +163,71 @@ LCFI5:
 	call _print
 ## (255*07)+256		// logical expression
 ##### 0+(1+(2+(3+(4+(5+(6+(7+8)))))))-(0+(1+(2+(3+(4+(5+(6+(7+8))))))))
-	movq $8,%rax
+	movq $8, %rax
 	pushq %rax
-	movq $7,%rax
+	movq $7, %rax
 	popq %rbx
 	addq %rbx,%rax
 	pushq %rax
-	movq $6,%rax
+	movq $6, %rax
 	popq %rbx
 	addq %rbx,%rax
 	pushq %rax
-	movq $5,%rax
+	movq $5, %rax
 	popq %rbx
 	addq %rbx,%rax
 	pushq %rax
-	movq $4,%rax
+	movq $4, %rax
 	popq %rbx
 	addq %rbx,%rax
 	pushq %rax
-	movq $3,%rax
+	movq $3, %rax
 	popq %rbx
 	addq %rbx,%rax
 	pushq %rax
-	movq $2,%rax
+	movq $2, %rax
 	popq %rbx
 	addq %rbx,%rax
 	pushq %rax
-	movq $1,%rax
+	movq $1, %rax
 	popq %rbx
 	addq %rbx,%rax
 	pushq %rax
-	movq $0,%rax
+	movq $0, %rax
 	popq %rbx
 	addq %rbx,%rax
 	pushq %rax
-	movq $8,%rax
+	movq $8, %rax
 	pushq %rax
-	movq $7,%rax
+	movq $7, %rax
 	popq %rbx
 	addq %rbx,%rax
 	pushq %rax
-	movq $6,%rax
+	movq $6, %rax
 	popq %rbx
 	addq %rbx,%rax
 	pushq %rax
-	movq $5,%rax
+	movq $5, %rax
 	popq %rbx
 	addq %rbx,%rax
 	pushq %rax
-	movq $4,%rax
+	movq $4, %rax
 	popq %rbx
 	addq %rbx,%rax
 	pushq %rax
-	movq $3,%rax
+	movq $3, %rax
 	popq %rbx
 	addq %rbx,%rax
 	pushq %rax
-	movq $2,%rax
+	movq $2, %rax
 	popq %rbx
 	addq %rbx,%rax
 	pushq %rax
-	movq $1,%rax
+	movq $1, %rax
 	popq %rbx
 	addq %rbx,%rax
 	pushq %rax
-	movq $0,%rax
+	movq $0, %rax
 	popq %rbx
 	addq %rbx,%rax
 	popq %rbx
@@ -236,9 +236,9 @@ LCFI5:
 	call _print
 ## 0+(1+(2+(3+(4+(5+(6+(7+8)))))))-(0+(1+(2+(3+(4+(5+(6+(7+8))))))))
 ##### 100/10
-	movq $10,%rax
+	movq $10, %rax
 	pushq %rax
-	movq $100,%rax
+	movq $100, %rax
 	popq %rbx
 	cltd
 	idivq %rbx
@@ -246,62 +246,79 @@ LCFI5:
 	call _print
 ## 100/10
 ##### a=1*3
-	movq $3,%rax
+	movq $3, %rax
 	pushq %rax
-	movq $1,%rax
+	movq $1, %rax
 	popq %rbx
 	imulq %rbx,%rax
-	movl %eax, 0(%rbp)
+	movq _v@GOTPCREL(%rip), %rcx
+	movq %rax, 0(%rcx)
 	movq %rax, %rdi
 	call _print
 ## a=1*3
 ##### b=2*3
-	movq $3,%rax
+	movq $3, %rax
 	pushq %rax
-	movq $2,%rax
+	movq $2, %rax
 	popq %rbx
 	imulq %rbx,%rax
-	movl %eax, -4(%rbp)
+	movq _v@GOTPCREL(%rip), %rcx
+	movq %rax, 8(%rcx)
 	movq %rax, %rdi
 	call _print
 ## b=2*3
 ##### a+b
-	movl -4(%rbp), %eax
+	movq _v@GOTPCREL(%rip), %rcx
+	movq 8(%rcx),%rax
 	pushq %rax
-	movl 0(%rbp), %eax
+	movq _v@GOTPCREL(%rip), %rcx
+	movq 0(%rcx),%rax
 	popq %rbx
 	addq %rbx,%rax
 	movq %rax, %rdi
 	call _print
 ## a+b
 ##### a=(b=3*2)
-	movq $2,%rax
+	movq $2, %rax
 	pushq %rax
-	movq $3,%rax
+	movq $3, %rax
 	popq %rbx
 	imulq %rbx,%rax
-	movl %eax, -4(%rbp)
-	movl %eax, 0(%rbp)
+	movq _v@GOTPCREL(%rip), %rcx
+	movq %rax, 8(%rcx)
+	movq _v@GOTPCREL(%rip), %rcx
+	movq %rax, 0(%rcx)
 	movq %rax, %rdi
 	call _print
 ## a=(b=3*2)
 ##### a>1
-	movl 0(%rbp), %eax
+	movq _v@GOTPCREL(%rip), %rcx
+	movq 0(%rcx),%rax
 	pushq %rax
-	movq $1,%rax
-	cmpq %rax, (%rsp)
+	movq $1, %rax
+	cmpq %rax,(%rsp)
+	setg %al
+	movzbq %al,%rax
+	addq $8,%rsp
 	movq %rax, %rdi
 	call _print
 ## a>1
 ##### b
-	movl -4(%rbp), %eax
+	movq _v@GOTPCREL(%rip), %rcx
+	movq 8(%rcx),%rax
 	movq %rax, %rdi
 	call _print
 ## b
-##### b>a	movl -4(%rbp), %eax
+##### b>a
+	movq _v@GOTPCREL(%rip), %rcx
+	movq 8(%rcx),%rax
 	pushq %rax
-	movl 0(%rbp), %eax
-	cmpq %rax, (%rsp)
+	movq _v@GOTPCREL(%rip), %rcx
+	movq 0(%rcx),%rax
+	cmpq %rax,(%rsp)
+	setg %al
+	movzbq %al,%rax
+	addq $8,%rsp
 	movq %rax, %rdi
 	call _print
 ## b>a

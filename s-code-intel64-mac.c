@@ -134,19 +134,24 @@ emit_push()
 void
 emit_compare()
 {
-    printf("\tcmpq %%rax, (%%rsp)\n");
+    printf("\tcmpq %%rax,(%%rsp)\n");
+    printf("\tsetg %%al\n");
+    printf("\tmovzbq %%al,%%rax\n");
+    printf("\taddq $8,%%rsp\n");
 }
 
 void
-emit_store( int d )
+emit_store(int d)
 {
-    printf("\tmovl %%eax, %d(%%rbp)\n", -4 * d);
+    printf("\tmovq _v@GOTPCREL(%%rip), %%rcx\n");
+    printf("\tmovq %%rax, %d(%%rcx)\n" ,d * 8);
 }
 
 void
 emit_load(int d)
 {
-    printf("\tmovl %d(%%rbp), %%eax\n", -4 * d);
+    printf("\tmovq _v@GOTPCREL(%%rip), %%rcx\n");
+    printf("\tmovq %d(%%rcx),%%rax\n" ,d * 8);
 }
 
 
@@ -191,7 +196,7 @@ void
 emit_value(d)
 int d;
 {
-    printf("\tmovq $%d,%%rax\n",d);
+    printf("\tmovq $%d, %%rax\n", d);
 }
 
 void

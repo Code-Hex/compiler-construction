@@ -90,23 +90,23 @@ set_node(nodes *ary, int type, int value, node_ptr left, node_ptr right)
 		switch(type) {
 		case '>':
 		    right->value = (left->value > right->value); 
-		    free(left); return right;
+		    return right;
 		case '+':
 		    right->value = left->value + right->value; 
-		    free(left); return right;
+		    return right;
 		case '-':
 		    right->value = left->value - right->value; 
-		    free(left); return right;
+		    return right;
 		case '*':
 		    right->value = right->value * left->value;
-		    free(left); return right;
+		    return right;
 		case '/':
 		    if (right->value==0) {
 				error("zero divide in compile time");
 		    } else {
 				right->value = left->value / right->value;
 		    }
-		    free(left); return right;
+		    return right;
 		}
     }
 
@@ -140,7 +140,7 @@ code_generate(node_ptr d)
 		code_generate(d->right);
 		emit_store(assign);
 		break;
-    case '>': 
+    case '>':
 		code_generate(d->left);
 		emit_push();
 		code_generate(d->right);
