@@ -85,11 +85,18 @@ LCFI5:
 	movq %rax, %rdi
 	call _print
 ## (255*07)+256		// logical expression
-##### 0+(1+(2+(3+(4+(5+(6+(7+8)))))))-(0+(1+(2+(3+(4+(5+(6+(7+8))))))))
+##### c=8
+	movq $8, %rax
+	movq _v@GOTPCREL(%rip), %rcx
+	movq %rax, 16(%rcx)
+	movq %rax, %rdi
+	call _print
+## c=8
+##### 0+(1+(2+(3+(4+(5+(6+(7+c)))))))-(0+(1+(2+(3+(4+(5+(6+(7+c))))))))
 	movq $0, %rax
 	movq %rax, %rdi
 	call _print
-## 0+(1+(2+(3+(4+(5+(6+(7+8)))))))-(0+(1+(2+(3+(4+(5+(6+(7+8))))))))
+## 0+(1+(2+(3+(4+(5+(6+(7+c)))))))-(0+(1+(2+(3+(4+(5+(6+(7+c))))))))
 ##### 100/10
 	movq $10, %rax
 	movq %rax, %rdi
@@ -160,21 +167,61 @@ LCFI5:
 	movq %rax, %rdi
 	call _print
 ## b>a
-##### (2-a)+3-b
-	movq _v@GOTPCREL(%rip), %rcx
-	movq 8(%rcx),%rax
-	pushq %rax
-	movq $5, %rax
-	pushq %rax
+##### (2-a)-3
 	movq _v@GOTPCREL(%rip), %rcx
 	movq 0(%rcx),%rax
-	popq %rbx
-	addq %rbx,%rax
+	pushq %rax
+	movq $-1, %rax
 	popq %rbx
 	subq %rbx,%rax
 	movq %rax, %rdi
 	call _print
-## (2-a)+3-b
+## (2-a)-3
+##### (2+a)+3
+	movq _v@GOTPCREL(%rip), %rcx
+	movq 0(%rcx),%rax
+	pushq %rax
+	movq $5, %rax
+	popq %rbx
+	addq %rbx,%rax
+	movq %rax, %rdi
+	call _print
+## (2+a)+3
+##### (a+2)+3
+	movq _v@GOTPCREL(%rip), %rcx
+	movq 0(%rcx),%rax
+	pushq %rax
+	movq $5, %rax
+	popq %rbx
+	addq %rbx,%rax
+	movq %rax, %rdi
+	call _print
+## (a+2)+3
+##### (a-8)-3 // -5
+	movq _v@GOTPCREL(%rip), %rcx
+	movq 0(%rcx),%rax
+	pushq %rax
+	movq $-11, %rax
+	popq %rbx
+	addq %rbx,%rax
+	movq %rax, %rdi
+	call _print
+## (a-8)-3 // -5
+##### ((2-a)+3)-b // -7
+	movq _v@GOTPCREL(%rip), %rcx
+	movq 8(%rcx),%rax
+	pushq %rax
+	movq _v@GOTPCREL(%rip), %rcx
+	movq 0(%rcx),%rax
+	pushq %rax
+	movq $5, %rax
+	popq %rbx
+	subq %rbx,%rax
+	popq %rbx
+	subq %rbx,%rax
+	movq %rax, %rdi
+	call _print
+## ((2-a)+3)-b // -7
     movq    $0,%rax
     leave
     ret

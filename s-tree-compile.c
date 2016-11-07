@@ -105,10 +105,23 @@ free_nodes(nodes *ary)
 	}
 }
 
+static int
+is_same_tree(node_ptr left, node_ptr right)
+{
+	if (left == NULL && right == NULL)
+		return 1;
+
+	if (left->type == right->type && left->value == right->value)
+			return is_same_tree(left->right, right->right)
+				&& is_same_tree(left->left, right->left);
+	return 0;
+}
+
 static node_ptr
 set_node(nodes *ary, int type, int value, node_ptr left, node_ptr right) 
 {
     node *d;
+
     if (optimize && (left && left->type == '0') &&
         (right && right->type == '0')) {
 		switch(type) {
@@ -134,35 +147,66 @@ set_node(nodes *ary, int type, int value, node_ptr left, node_ptr right)
 		}
     }
 
-    /* 一番左の葉に変数が来るようにする */
-    if (optimize && (left && left->type == '0')
-    	&& (right && right->type == 'v')) {
-    	int p = get_ptr(ary);
-    	d = ary->ptrs[p];
+    /* 左右同じ木を探索して, 同じだった場合の処理 */
+    if (optimize && is_same_tree(left, right)) {
+		switch(type) {
+		case '>':
+			right->type = '0';
+		    right->value = 0; 
+		    return right;
+		case '+':
+			right->type = '0';
+		    right->value = left->value * 2; 
+		    return right;
+		case '-':
+			right->type = '0';
+		    right->value = 0; 
+		    return right;
+		case '/':
+		    if (right->value == 0) {
+				error("zero divide in compile time");
+		    } else {
+		    	right->type = '0';
+				right->value = 1;
+		    }
+		    return right;
+		}
+	}
+
+
+    /*     -            +    */
+    /*   a   2  ->   -2   a  */
+    /* 一番右の葉に変数が来るようにする */
+    if (optimize && (left && left->type == 'v')
+    	&& (right && right->type == '0')) {
+    	d = ary->ptrs[get_ptr(ary)];
     	d->type = type;
 		switch(type) {
 		case '+':
+			d->left = right;
+		    d->right = left;
+		    return d;
 		case '-':
+			d->type = '+';
 		    d->left = right;
 		    d->right = left;
+		    d->left->value *= -1;
 		    return d;
 		}
     }
 
-    /*      -           +          +          +     */
-    /*    +   3  ->   -   a  ->  1   a  ->  a   1   */
-    /*   a 2         3 2                            */
+    /*      -           +    */
+    /*    +   2  ->   -   a  */
+    /*  -3 a        -3 2     */
     if (optimize && left && right
     	&& (left->type == '+' || left->type == '-')
     	&& right->type == '0') {
-    	int p = get_ptr(ary);
-    	d = ary->ptrs[p];
-    	d->type = type;
-
-    	/* 一番左の葉に変数があるため, 一番右の葉と入れ替える */
+    	d = ary->ptrs[get_ptr(ary)];
+    	d->type = left->type;
+    	/* 一番右の葉に変数があるため, 一番右の葉と入れ替える */
     	node *swp;
-    	swp = left->left;
-    	left->left = right;
+    	swp = left->right;
+    	left->right = right;
     	right = swp;
 
     	switch(type) {
@@ -174,15 +218,12 @@ set_node(nodes *ary, int type, int value, node_ptr left, node_ptr right)
 		    break;
 		}
 		left->type = '0';
-
-		/* 一番左の葉に変数が来るように入れ替え */
-		d->left = right;
-		d->right = left;
+		d->left = left;
+		d->right = right;
 		return d;
     }
 
-    int p = get_ptr(ary);
-    d = ary->ptrs[p];
+    d = ary->ptrs[get_ptr(ary)];
     d->type = type;
     d->value = value;
     d->left = left;
