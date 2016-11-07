@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdlib.h>    // for malloc
 
-static int optimize = 0;
+static int optimize = 1;
 
 #define ADD(type) ((type *)calloc(1, sizeof(type)))
 #define NEW(type, size) ((type **)calloc(size, sizeof(type)))
@@ -109,8 +109,8 @@ static node_ptr
 set_node(nodes *ary, int type, int value, node_ptr left, node_ptr right) 
 {
     node *d;
-    if (optimize && (left  &&  left->type =='0') &&
-        (right && right->type =='0')) {
+    if (optimize && (left && left->type == '0') &&
+        (right && right->type == '0')) {
 		switch(type) {
 		case '>':
 		    right->value = (left->value > right->value); 
@@ -125,13 +125,60 @@ set_node(nodes *ary, int type, int value, node_ptr left, node_ptr right)
 		    right->value = right->value * left->value;
 		    return right;
 		case '/':
-		    if (right->value==0) {
+		    if (right->value == 0) {
 				error("zero divide in compile time");
 		    } else {
 				right->value = left->value / right->value;
 		    }
 		    return right;
 		}
+    }
+
+    /* 一番左の葉に変数が来るようにする */
+    if (optimize && (left && left->type == '0')
+    	&& (right && right->type == 'v')) {
+    	int p = get_ptr(ary);
+    	d = ary->ptrs[p];
+    	d->type = type;
+		switch(type) {
+		case '+':
+		case '-':
+		    d->left = right;
+		    d->right = left;
+		    return d;
+		}
+    }
+
+    /*      -           +          +          +     */
+    /*    +   3  ->   -   a  ->  1   a  ->  a   1   */
+    /*   a 2         3 2                            */
+    if (optimize && left && right
+    	&& (left->type == '+' || left->type == '-')
+    	&& right->type == '0') {
+    	int p = get_ptr(ary);
+    	d = ary->ptrs[p];
+    	d->type = type;
+
+    	/* 一番左の葉に変数があるため, 一番右の葉と入れ替える */
+    	node *swp;
+    	swp = left->left;
+    	left->left = right;
+    	right = swp;
+
+    	switch(type) {
+		case '+':
+			left->value = left->left->value + left->right->value;
+			break;
+		case '-':
+		    left->value = left->left->value - left->right->value;
+		    break;
+		}
+		left->type = '0';
+
+		/* 一番左の葉に変数が来るように入れ替え */
+		d->left = right;
+		d->right = left;
+		return d;
     }
 
     int p = get_ptr(ary);
@@ -222,7 +269,7 @@ aexpr(nodes *ary)
 		case '-': 
 		    d = set_node(ary, '-', 0, d, mexpr(ary));
 		    break;
-		case '+': 
+		case '+':
 		    d = set_node(ary, '+', 0, d, mexpr(ary));
 		    break;
 		default:
@@ -240,10 +287,10 @@ mexpr(nodes *ary)
     d = term(ary);
     while(last_token!=EOF) {
 		switch(last_token) {
-		case '*': 
+		case '*':
 		    d = set_node(ary, '*', 0, d, term(ary));
 		    break;
-		case '/': 
+		case '/':
 		    d = set_node(ary, '/', 0, d, term(ary));
 		    break;
 		default:
