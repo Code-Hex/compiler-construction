@@ -35,6 +35,8 @@ static node *set_node(nodes *, int, int, node_ptr, node_ptr);
 static void free_nodes(nodes *);
 static void alloc_nodes(nodes *, int);
 static int get_ptr(nodes *);
+static int expr_len(const char *);
+static int isdigit(char);
 
 static int
 get_ptr(nodes *ary)
@@ -42,6 +44,28 @@ get_ptr(nodes *ary)
 	int p = ary->ptr;
 	ary->ptr++;
 	return p;
+}
+
+static int
+isdigit(char c) {
+	return '0' <= c && c <= '9';
+}
+
+static int
+expr_len(const char *s)
+{
+	char c;
+	int l = 0;
+	register const char *ss = s;
+  	while ((c = *ss++) != '\0') {
+  		if (*ss && c == '/' && *ss == '/') break;
+  		if (c > 0x20 && c != '(' && c != ')') {
+  			if (isdigit(*ss))
+  				while (isdigit(c)) c = *(++ss);
+	  		l++;
+	  	}
+  	}
+	return l;
 }
 
 static void
@@ -274,7 +298,7 @@ main()
 		ptr = buf;
 		before = buf;
 
-		alloc_nodes(&ary, strlen(buf) - 1);
+		alloc_nodes(&ary, expr_len(buf));
 		printf("%s %s", comments, buf);
 		d = expr(&ary);
 		code_generate(d);
